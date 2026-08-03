@@ -56,7 +56,7 @@ def fetch_tickets():
         time.sleep(1)
 
     # Save the fetched data to a JSON file
-    ticket_output_file = "C:/Users/Zendesk/Output/Zendesk_Tickets.json"
+    ticket_output_file = "./output/ZendeskTickets.json"
     with open(ticket_output_file, mode='w', encoding='utf-8') as f:
         json.dump(tickets, f, sort_keys=True, indent=2)
 
@@ -101,7 +101,7 @@ def fetch_users():
         users.extend(page['users'])
 
     # Save the users data to a JSON file
-    user_output_file = "C:/Users/Zendesk/Output/Zendesk_Users.json"
+    user_output_file = "./output/ZendeskUsers.json"
     with open(user_output_file, mode='w', encoding='utf-8') as f:
         json.dump(users, f, sort_keys=True, indent=2)
     

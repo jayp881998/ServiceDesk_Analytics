@@ -1,0 +1,8 @@
+.env
+.venv/
+output/
+*.json
+!data_sample/*.json
+__pycache__/
+*.pbix
+NEW_CHAT_BRIEF.md

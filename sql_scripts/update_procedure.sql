@@ -1,4 +1,4 @@
-USE [Zendesk_database]
+USE [zendesklog]
 GO
 SET ANSI_NULLS ON
 GO
@@ -7,8 +7,8 @@ GO
 
 -- Create a new stored procedure
 Alter PROCEDURE [UpdateProcedure]
-    @TicketFilePath NVARCHAR(MAX),
-	@UserFilePath NVARCHAR(MAX)
+    @TicketJsonFilePath NVARCHAR(MAX),
+	@UserJsonFilePath NVARCHAR(MAX)
 AS
 BEGIN
 
@@ -19,11 +19,11 @@ DECLARE @RecordsProcessed INT = 0;
 
 -- Load JSON data from the Tickets file
 SELECT @JSON = BulkColumn
-FROM OPENROWSET (BULK 'C:\Users\Zendesk\Output\Zendesk_Tickets.json', SINGLE_CLOB) AS import;
+FROM OPENROWSET (BULK '<OUTPUT_DIR>\ZendeskTickets.json', SINGLE_CLOB) AS import;
 
 -- Load JSON data from the Users file
 SELECT @JSONUsers = BulkColumn
-FROM OPENROWSET (BULK 'C:\Users\Zendesk\Output\Zendesk_Users.json', SINGLE_CLOB) AS importUsers;
+FROM OPENROWSET (BULK '<OUTPUT_DIR>\ZendeskUsers.json', SINGLE_CLOB) AS importUsers;
 
 -- Check if both JSON files are valid
 IF (ISJSON(@JSON) = 1) AND (ISJSON(@JSONUsers) = 1)

@@ -1,204 +1,126 @@
-# 📊 IT Support Analytics Pipeline (Zendesk → SQL Server → Power BI)
+# IT Support Analytics Pipeline — Zendesk → SQL Server → Power BI
 
-⚡ **Built an automated Zendesk → SQL Server → Power BI pipeline that eliminated manual reporting, enabled 45-minute refresh cycles, and improved decision-making efficiency by 60%.**
+An end-to-end analytics pipeline that pulls helpdesk data from the Zendesk API,
+lands and models it into a governed **star-schema warehouse** on SQL Server, and
+serves it through a **DAX semantic layer** in Power BI — refreshing itself on a
+**45-minute** automated cadence.
 
-⚠️ **Disclaimer:** This repository is a **portfolio project** featuring sanitized and anonymized data. All sensitive information has been removed or replaced with synthetic data to comply with NDA requirements. No proprietary or confidential organizational data is included.
-
----
-
-## 📌 Project Overview
-During my internship at a Medical Institute, I led the development of an **end-to-end analytics pipeline** that automated reporting for the helpdesk department.
-
-Previously, the team relied on **manual exports from Zendesk** and static PowerPoint updates, which delayed reporting cycles, introduced inconsistencies, and limited historical tracking.
-
-To solve this, I designed a **centralized reporting system** powered by the **Zendesk API, SQL Server, and Power BI**. The pipeline provided leadership with a **single source of truth for KPIs** such as SLA compliance, backlog, response times, and agent productivity.
-
-This initiative reduced manual effort by ~90%, enabled **near real-time reporting**, and improved operational decision-making across the helpdesk function.
+> **Disclaimer.** This repository is a portfolio recreation of a real production
+> system I built at **The Michener Institute of Education at UHN (Toronto)**.
+> To protect the institute's data, the code here runs on **fully synthetic sample
+> data** — no real tickets, users, names, or identifiers are included. The
+> architecture, schema, and logic are authentic; the data is not.
 
 ---
 
-## 🎯 Goal
-Transform manual, time-intensive IT support reporting into an **automated, real-time analytics pipeline** delivering actionable insights to executives and operations teams.
+## The problem
 
-Project goals included:
-- **Centralize Zendesk data** into a SQL Server warehouse for a single source of truth.
-- **Eliminate manual reporting overhead**, reducing errors and saving analyst/manager time.
-- **Deliver near real-time insights** through automated 45-minute refresh cycles.
-- **Enhance visibility & accountability** across SLA compliance, backlog, response times, and productivity.
-- **Build a scalable framework** for future Zendesk entities and analytics needs.
+Helpdesk reporting was rebuilt by hand every week from Zendesk exports pasted into
+PowerPoint. It took roughly **20 hours a week**, arrived stale, and each team used a
+slightly different definition of "resolution time," so leadership debated the numbers
+instead of acting on them.
 
----
+## What I built
 
-## 🔍 Problem Statement
-The helpdesk team relied on manual exports from Zendesk and static PowerPoint updates to track performance. This caused:
-- **20+ hours per week** wasted on manual reporting.
-- **Inconsistent and error-prone results**, reducing trust in metrics.
-- **Limited visibility**, with no trend analysis or root-cause insights.
-- **Delayed decision-making**, as weekly reports were outdated on delivery.
+A single automated pipeline that became the team's one source of truth:
 
----
+- **Python extraction** from the Zendesk API — incremental ticket export with
+  `metric_sets`, cursor pagination for users, HTTP 429 rate-limit handling with the
+  `retry-after` header, and **deduplication** on `(id, updated_at)`. Loads **5+ years**
+  of history (from 2019) plus ongoing incremental data.
+- **SQL Server warehouse** — a stored procedure parses nested JSON with `OPENJSON`
+  into typed relational tables (Tickets, Ticket_Metrics, Tags, Via, Users), validated
+  with `ISJSON` before load and modeled as a **star schema**.
+- **Power BI semantic layer** — a **DAX** model over 5 dashboards covering SLA
+  compliance, backlog aging, first-response and resolution times, reopen rate, and
+  agent productivity.
+- **Automation** — Windows Task Scheduler runs the extract; a SQL Server Agent job
+  runs the load stored procedure every 45 minutes; Power BI refreshes on top.
+- **Data quality** — `ISJSON` validation, deduplication, and reconciliation of
+  dashboard figures against Zendesk's native reports during testing.
 
-## 📊 Business Impact
+## Results (honest, matches my resume)
 
-**Quantified Results:**
-- ✅ **90% reduction in manual effort** → reporting time cut from 20 hrs → 2 hrs per week.
-- ✅ **45-minute refresh cycles** replaced weekly manual reporting.
-- ✅ **5 automated dashboards**: Executive, Operations, Agent Performance, Efficiency, Analytics.
-- ✅ **100% data accuracy** → eliminated manual transcription errors.
+- Replaced **~20 hours/week** of manual reporting with a **45-minute** automated refresh.
+- **5+ years** of history ingested (2019 → present) into a governed warehouse.
+- **5 Power BI dashboards** giving leadership a single source of truth.
+- **~30% fewer** ad-hoc clarification requests after rollout (stakeholder estimate).
 
-**Operational Improvements:**
-- Executives made faster, **data-driven decisions**.
-- Managers identified performance issues and training needs in real time.
-- Resources were allocated efficiently based on actual demand patterns.
-- SLA compliance tracking became **automated and transparent**.
-
----
-
-## ✅ Key Outcomes
-- **90% less manual effort** → Automated reporting replaced manual exports & slides.
-- **60% faster decision-making** → Leadership gained timely access to metrics.
-- **45-minute refresh cycles** → Near real-time insights improved accuracy.
-- **Single source of truth** → Centralized SQL Server warehouse standardized KPIs.
-- **Actionable insights** → Dashboards tracked SLA, backlog, and agent productivity.
+> Figures are the same ones on my resume and portfolio. Where a number is an estimate,
+> it is labelled as one.
 
 ---
 
-## 🛠️ Approach / Solution Overview
+## Architecture
 
-The solution was delivered in **four phases**:
-
-**Phase 1: Data Extraction**
-- Python scripts ingested JSON data from Zendesk endpoints (tickets, metrics, users, groups, tags, via).
-- Implemented **pagination, rate-limit retries, and checkpointing** for reliable historical + incremental loads.
-
-**Phase 2: Data Warehousing & Integration**
-- Designed a **fact/dimension warehouse** in SQL Server.
-- Built **stored procedures with UPSERT logic** for incremental refresh & historical accuracy.
-- Optimized schema into a **star model** for BI performance.
-
-**Phase 3: Business Intelligence Layer**
-- Connected SQL Server to **Power BI** for live dashboards.
-- Applied **Power Query (M Code)** for transformations and **DAX** for KPIs.
-- Designed interactive dashboards tailored to executives, operations, and agents.
-
-**Phase 4: Automation & Monitoring**
-- Automated a **45-minute refresh cadence**, replacing weekly manual updates.
-- Added validation checks (row counts, error handling) for reliability.
-
-**Data Flow:**
-`Zendesk API → Python ETL → SQL Server Warehouse → Power BI Dashboards → Stakeholder Insights`
-
----
-
-## 🏗️ Architecture Overview
-
-```
-Zendesk API (JSON)
-      ↓  [Python: extraction, rate-limit handling, checkpointing]
-SQL Server Staging (raw ingestion tables)
-      ↓  [Stored Procedures: UPSERT, normalization]
-SQL Server Warehouse (fact & dimension schema)
-      ↓
-Power BI (dashboards for executives, operations, agents)
+```mermaid
+flowchart TD
+    A["Zendesk REST API<br/>(tickets + users, JSON)"] -->|"Python ETL<br/>incremental export · cursor pagination<br/>429 retry-after · dedup on (id, updated_at)"| B["Local JSON output<br/>ZendeskTickets.json · ZendeskUsers.json"]
+    B -->|"Stored procedure<br/>ISJSON validation · OPENJSON parse"| C["SQL Server warehouse"]
+    C --> D["Star schema<br/>Tickets · Ticket_Metrics · Tags · Via · Users"]
+    D -->|"DAX semantic layer"| E["Power BI<br/>5 dashboards · RLS"]
+    F["Windows Task Scheduler"] -.->|"runs extract"| A
+    G["SQL Server Agent<br/>every 45 min"] -.->|"runs load"| C
+    E -.->|"scheduled refresh"| E
 ```
 
-**Key Design Principles:**
-- **Reliability:** Pagination, retries, and checkpointing ensured complete ingestion.
-- **Scalability:** Fact/dimension schema easily extended to new Zendesk entities.
-- **Performance:** UPSERT logic and star schema optimized BI queries.
-- **Usability:** Power BI dashboards delivered actionable KPIs for stakeholders.
-
-
----
-
-## 📊 Dashboards & KPIs
-
-**Views**
-- **Executive Overview:** Ticket volume, SLA compliance, backlog trend.
-- **Operations Control:** First Response Time, Resolution Time, SLA breaches, backlog aging, channel mix.
-- **Agent Performance:** Tickets handled, responsiveness, reopen rates, productivity trends.
-
-**KPIs**
-- Ticket Volume (Created / Resolved / Open)
-- Backlog & Aging Buckets
-- SLA Compliance (% meeting SLA, breaches)
-- First Response Time (FRT) & Resolution Time (TTR)
-- Reopen Rate (quality signal)
-- Agent Productivity (assigned vs. closed, trends)
-- Channel Mix (email, web, chat performance)
-
----
-
-## 🧰 Tech Stack
-
-**Languages & Libraries**
-- Python (`requests`, `pandas`, JSON handling, retry logic)
-- SQL / T-SQL (stored procedures, MERGE/UPSERT, indexing)
-
-**Data Sources**
-- Zendesk API (JSON: Tickets, Metrics, Users, Groups, Tags, Via)
-
-**Database & ETL**
-- SQL Server (SSMS): staging tables, fact/dimension schema, audit logging
-- Automation: Windows Task Scheduler for incremental loads
-
-**Visualization**
-- Power BI: Power Query (M Code), DAX, drilldowns, slicers, KPIs
-
----
-
-## 📂 Repository Structure & Privacy Note
+<details>
+<summary>Text version of the data flow</summary>
 
 ```
-helpdesk-analytics-pipeline/
-├─ python/         # Python scripts for data extraction & transformations
-├─ sql/            # SQL schema, tables, stored procedures
-├─ powerbi/        # Power BI dashboards (.pbix) + screenshots
-├─ docs/           # Architecture diagrams, ERD, runbook
-├─ data_sample/    # Dummy JSON files (sanitized)
-└─ README.md
+Zendesk REST API (JSON)
+   │  Python: incremental export, pagination, 429 retries, dedup on (id, updated_at)
+   ▼
+Local JSON output  ──►  SQL Server (SSMS)
+                          │  Stored procedure: ISJSON validation, OPENJSON parse,
+                          │  typed load into Tickets / Ticket_Metrics / Tags / Via / Users
+                          ▼
+                        Star-schema warehouse (fact + conformed dimensions)
+                          │  Power BI: DAX semantic model, 5 dashboards, RLS
+                          ▼
+                        Automated refresh (Task Scheduler + SQL Server Agent, 45 min)
 ```
 
-### 🔐 Privacy Note
-- All **company identifiers and sensitive data** have been anonymized.
-- Sample JSON data is included for demonstration only.
-- The **pipeline architecture and results** are authentic, drawn from a real project.
+</details>
 
----
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the phase-by-phase build and
+[`docs/DATA_DICTIONARY.md`](docs/DATA_DICTIONARY.md) for the table/field reference.
 
-## 🎯 Skills Demonstrated
+## Repository structure
 
-**Technical Competencies**
-- **Data Engineering:** ETL pipeline design, API integration, data modeling
-- **Database Management:** SQL Server, query optimization, indexing
-- **Business Intelligence:** Power BI dashboards, KPI design, DAX, interactivity
-- **Programming:** Python, pandas, REST API, error handling
-- **Automation:** Task scheduling, validation checks
+```
+├─ python_scripts/     # Zendesk API extraction (env-var auth, pagination, retries, dedup)
+│  ├─ extract_zendesk.py
+│  └─ .env.example
+├─ sql_scripts/        # Stored procedure: JSON validation + OPENJSON load into star schema
+│  └─ update_procedure.sql
+├─ automation/         # Task Scheduler runner
+│  └─ run_pipeline.ps1
+├─ powerbi/            # Model screenshot, dashboard screenshots, .pbix (synthetic)
+├─ docs/               # Architecture and data dictionary
+├─ data_sample/        # SYNTHETIC sample JSON only (see HOW_TO_GENERATE.md)
+├─ requirements.txt
+└─ .gitignore
+```
 
-**Business Skills**
-- Stakeholder Management → worked with executives, managers, and end-users
-- Requirements Analysis → translated business needs into technical specs
-- Change Management → transitioned org from manual → automated reporting
-- Training & Documentation → user guides, stakeholder training sessions
-- ROI Analysis → quantified savings (~$50K+ annually in efficiency gains)
+## Running it
 
----
+1. `python -m venv .venv && .venv\Scripts\activate`
+2. `pip install -r requirements.txt`
+3. Copy `python_scripts/.env.example` to `.env`; add your Zendesk email, API token, subdomain.
+4. `python python_scripts/extract_zendesk.py` → writes JSON to `./output/`.
+5. In SSMS, run `sql_scripts/update_procedure.sql` to load the warehouse (point the
+   `<OUTPUT_DIR>` paths at your output folder or pass them as the procedure's parameters).
+6. Connect Power BI to the warehouse; schedule the extract via Task Scheduler and the
+   load via SQL Server Agent.
 
-## 📞 Connect With Me
-This project reflects my passion for turning **raw data into actionable business insights**. I specialize in building end-to-end solutions that deliver measurable value.
+## Tech stack
 
-**Looking For:**
-- Data Analyst roles (ETL pipelines, data analysis)
-- Business Intelligence roles (dashboard development, analytics)
-- Analytics Engineer roles (technical + business blend)
-- Data Analyst roles with technical development focus
+Python (`requests`, `pandas`, `python-dotenv`) · SQL Server / T-SQL (`OPENJSON`,
+stored procedures, `MERGE`/UPSERT) · Power BI (DAX, Power Query/M, RLS) ·
+Windows Task Scheduler · SQL Server Agent
 
-**Contact Information:**
-- 🌐 Portfolio: *[your-portfolio.com]*
-- 💼 LinkedIn: *https://www.linkedin.com/in/jaypanchal0808/*
-- 📧 Email: *panchaljay0808@gmail.com*
-- 🐙 GitHub: *https://github.com/jayp881998*
+## About
 
-⭐ *Star this repository if you found it helpful!*
-
----
+Built by **Jay Panchal** — BI Developer · Operations & Inventory Analyst, Toronto.
+Portfolio: https://jayp881998.github.io · LinkedIn: https://www.linkedin.com/in/jaypanchal0808
