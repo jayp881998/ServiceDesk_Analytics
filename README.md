@@ -92,7 +92,7 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the phase-by-phase build 
 │  └─ update_procedure.sql
 ├─ automation/         # Task Scheduler runner
 │  └─ run_pipeline.ps1
-├─ powerbi/            # Model screenshot, dashboard screenshots, .pbix (synthetic)
+├─ powerbi/            # Star schema diagram, dashboard screenshots, generation script
 ├─ docs/               # Architecture and data dictionary
 ├─ data_sample/        # SYNTHETIC sample JSON only (see HOW_TO_GENERATE.md)
 ├─ requirements.txt
@@ -105,8 +105,8 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the phase-by-phase build 
 2. `pip install -r requirements.txt`
 3. Copy `python_scripts/.env.example` to `.env`; add your Zendesk email, API token, subdomain.
 4. `python python_scripts/extract_zendesk.py` → writes JSON to `./output/`.
-5. In SSMS, run `sql_scripts/update_procedure.sql` to load the warehouse (point the
-   `<OUTPUT_DIR>` paths at your output folder or pass them as the procedure's parameters).
+5. In SSMS, run `sql_scripts/update_procedure.sql` — pass the path to your `output/`
+   folder as `@TicketJsonFilePath` and `@UserJsonFilePath` when calling the procedure.
 6. Connect Power BI to the warehouse; schedule the extract via Task Scheduler and the
    load via SQL Server Agent.
 

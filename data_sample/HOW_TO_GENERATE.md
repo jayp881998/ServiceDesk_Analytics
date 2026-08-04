@@ -1,24 +1,30 @@
-# Synthetic sample data — READ FIRST
+# Synthetic sample data
 
-**Do not commit any real Zendesk export here.** The original `data sample.txt` from the
-real system contained genuine helpdesk PII (names, emails, addresses, ticket text) and
-must never be published. This folder holds **only fabricated** JSON that mirrors the
-Zendesk *shape* so the pipeline runs end to end without any real data.
+**Do not commit any real Zendesk export here.** This folder contains only fabricated
+JSON that mirrors the Zendesk field structure so the pipeline runs end to end without
+any real data.
 
-## What to generate
-Two files matching the fields in `docs/DATA_DICTIONARY.md`:
+## What's included
 
-- `tickets_sample.json` — 30–100 tickets. Fabricated `id`, `created_at`/`updated_at`
-  spread across dates, random `status`/`priority`/`type`, and a nested `metric_set`
-  with plausible reply/resolution/on-hold times. Include `via`, `tags`, and a few
-  `brand_id`/`group_id` values so the dimensions populate.
-- `users_sample.json` — 10–20 users with fake names/emails (e.g. `Agent One`,
-  `agent1@example.com`), roles (`agent`, `end-user`), and login timestamps.
+| File | Description |
+|---|---|
+| `tickets_sample.json` | 800 synthetic tickets, 2019–2026 |
+| `users_sample.json` | 25 synthetic users (agents, admins, end-users) |
+| `generate_sample.py` | Script that produced both files |
 
-## Rules
-- Fake names only (`Alex Rivera`, `Sam Okafor`…), example.com emails, no real orgs.
-- Keep field names and nesting identical to real Zendesk JSON so `OPENJSON` still parses.
-- Enough variety that the 5 dashboards render (a range of statuses, dates, agents, channels).
+## Regenerating
 
-A short Python (Faker) or hand-written generator is enough. The new-chat brief includes
-instructions to build one.
+```
+python data_sample/generate_sample.py
+```
+
+Writes fresh `tickets_sample.json` and `users_sample.json` to this folder.
+Default counts: 800 tickets, 25 users. Edit the constants at the top of the script
+to change volume.
+
+## Rules for any replacement data
+
+- Fake names only (`Alex Rivera`, `Sam Okafor`), `@example.com` emails, no real orgs.
+- Field names and nesting must be identical to real Zendesk JSON so `OPENJSON` still parses correctly.
+- Include enough variety across `status`, `priority`, `channel`, `group_id`, and date range
+  for all three dashboards to render meaningfully.
