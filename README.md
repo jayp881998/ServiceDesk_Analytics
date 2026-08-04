@@ -5,11 +5,10 @@ lands and models it into a governed **star-schema warehouse** on SQL Server, and
 serves it through a **DAX semantic layer** in Power BI — refreshing itself on a
 **45-minute** automated cadence.
 
-> **Disclaimer.** This repository is a portfolio recreation of a real production
-> system I built at **The Michener Institute of Education at UHN (Toronto)**.
-> To protect the institute's data, the code here runs on **fully synthetic sample
-> data** — no real tickets, users, names, or identifiers are included. The
-> architecture, schema, and logic are authentic; the data is not.
+> **Note.** Built at **The Michener Institute of Education at UHN (Toronto)**.
+> This repo uses **fully synthetic sample data** — no real tickets, users, or
+> identifiers are included. Architecture, schema, and ETL logic reflect the
+> production system; the data does not.
 
 ---
 
@@ -39,15 +38,12 @@ A single automated pipeline that became the team's one source of truth:
 - **Data quality** — `ISJSON` validation, deduplication, and reconciliation of
   dashboard figures against Zendesk's native reports during testing.
 
-## Results (honest, matches my resume)
+## Results
 
 - Replaced **~20 hours/week** of manual reporting with a **45-minute** automated refresh.
 - **5+ years** of history ingested (2019 → present) into a governed warehouse.
 - **5 Power BI dashboards** giving leadership a single source of truth.
-- **~30% fewer** ad-hoc clarification requests after rollout (stakeholder estimate).
-
-> Figures are the same ones on my resume and portfolio. Where a number is an estimate,
-> it is labelled as one.
+- **~30%** fewer ad-hoc clarification requests after rollout (stakeholder estimate).
 
 ---
 
