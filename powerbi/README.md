@@ -7,11 +7,16 @@ SQL Server warehouse.
 
 | File | Description |
 |---|---|
-| `model_star_schema.png` | Power BI model view — star schema with Tickets (fact), Dim_Date, Dim_User (Requester), Dim_User (Agent), Dim_Group, Ticket_Metrics, Via, and Tags |
+| `model_star_schema.png` | Star-schema data model diagram — Tickets (fact), Dim_Date, Dim_User (Requester), Dim_User (Agent), Dim_Group, Ticket_Metrics, Via, and Tags. Mirrors the tables loaded by `sql_scripts/update_procedure.sql` |
 | `dash_executive.png` | Executive Overview — KPI tiles, ticket volume by year, status mix, channel mix, priority and group breakdown |
 | `dash_operations.png` | Operations Control — monthly trend, FRT/full-resolution histograms, backlog aging, SLA % by priority |
 | `dash_agent.png` | Agent Performance — tickets handled, median FRT, reopen rate, and reply distribution per agent |
-| `make_dashboards.py` | Python script that regenerates all four PNGs from the synthetic sample data |
+| `make_dashboards.py` | Python script that regenerates the three dashboard PNGs from the synthetic sample data |
+| `schema.dot` | Graphviz source for `model_star_schema.png` (render with `dot -Tpng schema.dot -o model_star_schema.png`) |
+
+> The images are **generated from the synthetic sample data**, not screenshots of the
+> live Power BI report. They reproduce the production report's layout, model, and measures
+> so the repo can show the analytics without exposing any real Michener data.
 
 ## Dashboards
 

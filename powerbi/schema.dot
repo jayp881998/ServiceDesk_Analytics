@@ -1,0 +1,86 @@
+digraph star {
+  rankdir=LR;
+  bgcolor="white";
+  graph [pad="0.4", nodesep="0.5", ranksep="1.4", fontname="Helvetica"];
+  node [shape=plaintext, fontname="Helvetica"];
+
+  // ---- FACT ----
+  Tickets [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" BGCOLOR="#1F3B57">
+      <TR><TD COLSPAN="1" BGCOLOR="#1F3B57"><FONT COLOR="white"><B>  Tickets  (FACT)  </B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#EAF1F8"><FONT COLOR="#1F3B57"><B>PK  Id</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F7FAFD">FK  Requester Id</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F7FAFD">FK  Assignee Id</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F7FAFD">FK  Group Id</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F7FAFD">FK  Created At (date)</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F7FAFD">Status · Priority · Type</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F7FAFD">Subject · Brand Id</TD></TR>
+    </TABLE>>];
+
+  // ---- FACT SATELLITE (1:1) ----
+  Metrics [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" BGCOLOR="#2E5E4E">
+      <TR><TD BGCOLOR="#2E5E4E"><FONT COLOR="white"><B>  Ticket_Metrics  </B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#EAF6F0">FK  Ticket Id</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F5FBF8">First Resolution Time</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F5FBF8">Full Resolution Time</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F5FBF8">Reply / Wait Times</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F5FBF8">Reopens · Replies</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F5FBF8">Solved At</TD></TR>
+    </TABLE>>];
+
+  // ---- DIMENSIONS ----
+  DimDate [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" BGCOLOR="#8A5A2B">
+      <TR><TD BGCOLOR="#8A5A2B"><FONT COLOR="white"><B>  Dim_Date  </B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#FBF3E9"><B>PK  Date</B></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#FDF9F3">Year · Quarter · Month</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#FDF9F3">Week · Day · Hour</TD></TR>
+    </TABLE>>];
+
+  DimReq [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" BGCOLOR="#5A3E7A">
+      <TR><TD BGCOLOR="#5A3E7A"><FONT COLOR="white"><B>  Dim_User (Requester)  </B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F3EFF8"><B>PK  Id</B></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F9F6FC">Name · Email · Role</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F9F6FC">Active · Last Login</TD></TR>
+    </TABLE>>];
+
+  DimAgent [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" BGCOLOR="#5A3E7A">
+      <TR><TD BGCOLOR="#5A3E7A"><FONT COLOR="white"><B>  Dim_User (Agent)  </B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F3EFF8"><B>PK  Id</B></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F9F6FC">Name · Role (agent/admin)</TD></TR>
+    </TABLE>>];
+
+  DimGroup [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" BGCOLOR="#8A2B4A">
+      <TR><TD BGCOLOR="#8A2B4A"><FONT COLOR="white"><B>  Dim_Group  </B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#FBEBF0"><B>PK  Group Id</B></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#FDF3F6">Group Name</TD></TR>
+    </TABLE>>];
+
+  DimChannel [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" BGCOLOR="#2B6E8A">
+      <TR><TD BGCOLOR="#2B6E8A"><FONT COLOR="white"><B>  Via (Channel)  </B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#E9F4F8"><B>PK  Ticket Id</B></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F3FAFC">Channel · Source</TD></TR>
+    </TABLE>>];
+
+  DimTag [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" BGCOLOR="#5A6B2B">
+      <TR><TD BGCOLOR="#5A6B2B"><FONT COLOR="white"><B>  Tags  (bridge)  </B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F1F5E9">FK  TicketID</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#F7FAF3">Tag</TD></TR>
+    </TABLE>>];
+
+  edge [color="#5B6B7B", penwidth=1.6, arrowhead=none, fontname="Helvetica", fontsize=10, fontcolor="#334"];
+
+  DimDate   -> Tickets [headlabel="*", taillabel="1", labeldistance=2.2];
+  DimReq    -> Tickets [headlabel="*", taillabel="1", labeldistance=2.2];
+  DimAgent  -> Tickets [headlabel="*", taillabel="1", labeldistance=2.2];
+  DimGroup  -> Tickets [headlabel="*", taillabel="1", labeldistance=2.2];
+  Tickets   -> Metrics [headlabel="1", taillabel="1", labeldistance=2.2];
+  Tickets   -> DimChannel [headlabel="1", taillabel="1", labeldistance=2.2];
+  Tickets   -> DimTag [headlabel="*", taillabel="1", labeldistance=2.2];
+}

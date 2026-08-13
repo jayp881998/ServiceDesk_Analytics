@@ -82,6 +82,32 @@ Local JSON output  ──►  SQL Server (SSMS)
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the phase-by-phase build and
 [`docs/DATA_DICTIONARY.md`](docs/DATA_DICTIONARY.md) for the table/field reference.
 
+## Data model
+
+The star schema loaded by `sql_scripts/update_procedure.sql` — a `Tickets` fact with a
+1:1 `Ticket_Metrics` satellite, surrounded by Date, User (role-playing as Requester and
+Agent), Group, Channel (`Via`), and a `Tags` bridge.
+
+![Star-schema data model](powerbi/model_star_schema.png)
+
+## Dashboards
+
+The Power BI report views, **rebuilt on the synthetic sample data** (800 tickets,
+2019–2026) so no real figures appear. The metrics below are computed from that generated
+dataset — they illustrate the layout and measures, not real Michener numbers.
+
+**Executive Overview** — volume, SLA compliance, backlog, reopen rate, status/channel/priority mix.
+
+![Executive Overview dashboard](powerbi/dash_executive.png)
+
+**Operations Control** — first-response and full-resolution times, monthly volume, backlog aging, SLA by priority.
+
+![Operations Control dashboard](powerbi/dash_operations.png)
+
+**Agent Performance** — workload, median response time, reopen rate, and replies per ticket by agent.
+
+![Agent Performance dashboard](powerbi/dash_agent.png)
+
 ## Repository structure
 
 ```
